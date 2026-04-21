@@ -1,312 +1,465 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cours JavaScript - Apprentissage Progressif</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10b981',
+                        secondary: '#6366f1'
+                    }
+                }
+            }
+        }
+    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
         body { font-family: 'Inter', sans-serif; }
         .code-editor { font-family: 'Fira Code', monospace; }
         .lesson-content { display: none; }
         .lesson-content.active { display: block; }
+        .sidebar { transition: transform 0.3s ease; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); position: fixed; z-index: 50; }
+            .sidebar.open { transform: translateX(0); }
+            main.ml-64 { margin-left: 0; }
+        }
+        .progress-bar { transition: width 0.3s ease; }
+        .quiz-option.selected { background-color: #10b981; border-color: #10b981; }
+        .exercise-input { transition: all 0.2s; }
+        .exercise-input.correct { border-color: #10b981; background-color: rgba(16, 185, 129, 0.1); }
+        .exercise-input.incorrect { border-color: #ef4444; background-color: rgba(239, 68, 68, 0.1); }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen">
+<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-100 min-h-screen transition-colors">
+    
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 h-16 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 z-40 flex items-center justify-between px-4">
+        <div class="flex items-center gap-4">
+            <button id="menuBtn" class="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h1 class="text-xl font-bold text-primary"><i class="fab fa-js mr-2"></i>JS Cours</h1>
+        </div>
+        
+        <!-- Search -->
+        <div class="hidden md:block relative">
+            <input type="text" id="searchInput" placeholder="Rechercher..." 
+                class="w-64 px-4 py-2 pl-10 bg-gray-100 dark:bg-gray-700 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <div id="searchResults" class="hidden absolute top-full left-0 w-full mt-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 max-h-60 overflow-y-auto">
+            </div>
+        </div>
+        
+        <div class="flex items-center gap-3">
+            <div class="text-sm text-gray-500 hidden sm:block">
+                <span id="progressText">0%</span> terminé
+            </div>
+            <button id="themeToggle" class="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:inline"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="fixed top-16 left-0 right-0 h-1 bg-gray-200 dark:bg-gray-700 z-30">
+        <div id="progressBar" class="progress-bar h-full bg-primary" style="width: 0%"></div>
+    </div>
+
     <!-- Sidebar -->
-    <aside class="fixed left-0 top-0 h-full w-64 bg-gray-800 border-r border-gray-700 overflow-y-auto z-50">
-        <div class="p-4 border-b border-gray-700">
-            <h1 class="text-xl font-bold text-emerald-400">JS Cours</h1>
-            <p class="text-xs text-gray-400 mt-1">Apprentissage progressif</p>
+    <aside id="sidebar" class="sidebar fixed left-0 top-[65px] h-[calc(100vh-65px)] w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 overflow-y-auto z-40">
+        <div class="p-4">
+            <div class="mb-4">
+                <div class="text-xs text-gray-500 mb-2">Progression</div>
+                <div class="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                    <div id="sidebarProgress" class="h-full bg-primary transition-all" style="width: 0%"></div>
+                </div>
+            </div>
         </div>
         
         <nav class="p-2" id="lessonNav">
-            <!-- Lesson 1: Introduction -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="intro">
-                <span class="text-emerald-400">01.</span> Introduction
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="intro">
+                <span><span class="text-primary">01.</span> Introduction</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 2: Variables -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="variables">
-                <span class="text-emerald-400">02.</span> Variables
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="variables">
+                <span><span class="text-primary">02.</span> Variables</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 3: Types -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="types">
-                <span class="text-emerald-400">03.</span> Types de données
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="types">
+                <span><span class="text-primary">03.</span> Types de données</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 4: Conditions -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="conditions">
-                <span class="text-emerald-400">04.</span> Conditions
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="conditions">
+                <span><span class="text-primary">04.</span> Conditions</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 5: Boucles -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="boucles">
-                <span class="text-emerald-400">05.</span> Boucles
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="boucles">
+                <span><span class="text-primary">05.</span> Boucles</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 6: Fonctions -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="fonctions">
-                <span class="text-emerald-400">06.</span> Fonctions
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="fonctions">
+                <span><span class="text-primary">06.</span> Fonctions</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 7: Tableaux -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="tableaux">
-                <span class="text-emerald-400">07.</span> Tableaux
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="tableaux">
+                <span><span class="text-primary">07.</span> Tableaux</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 8: Objets -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="objets">
-                <span class="text-emerald-400">08.</span> Objets
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="objets">
+                <span><span class="text-primary">08.</span> Objets</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 9: DOM -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm mb-1" data-lesson="dom">
-                <span class="text-emerald-400">09.</span> DOM
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm mb-1 flex items-center justify-between" data-lesson="dom">
+                <span><span class="text-primary">09.</span> DOM</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
             
-            <!-- Lesson 10: Events -->
-            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-700 text-sm" data-lesson="events">
-                <span class="text-emerald-400">10.</span> Événements
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="events">
+                <span><span class="text-primary">10.</span> Événements</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
+            </button>
+            
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="formulaires">
+                <span><span class="text-primary">11.</span> Formulaires</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
+            </button>
+            
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="localstorage">
+                <span><span class="text-primary">12.</span> localStorage</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
+            </button>
+            
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="sessionstorage">
+                <span><span class="text-primary">13.</span> sessionStorage</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
+            </button>
+            
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="poo">
+                <span><span class="text-primary">14.</span> POO</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
         </nav>
+        
+        <div class="p-4 mt-4 border-t border-gray-200 dark:border-gray-700">
+            <button id="resetProgress" class="w-full px-3 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded">
+                <i class="fas fa-redo mr-2"></i>Réinitialiser
+            </button>
+        </div>
     </aside>
 
+    <!-- Overlay mobile -->
+    <div id="overlay" class="fixed inset-0 bg-black/50 z-30 hidden" onclick="toggleSidebar()"></div>
+
     <!-- Main Content -->
-    <main class="ml-64 p-8">
+    <main class="ml-64 pt-[73px] p-4 md:p-8">
         <div class="max-w-4xl mx-auto">
             
             <!-- Lesson 1: Introduction -->
             <section id="intro" class="lesson-content active">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 1/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 1/14</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Introduction à JavaScript</h2>
-                    <p class="text-gray-400">JavaScript est un langage de programmation interprète, orienté objet, faiblement typé et principalement utilisé côté client (navigateur). Il permet de rendre les pages web dynamiques et interactives.</p>
+                    <p class="text-gray-600 dark:text-gray-400">JavaScript est un langage de programmation interprété, orienté objet, faiblement typé et principalement utilisé côté client (navigateur).</p>
                 </div>
                 
-                <div class="bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6">
-                    <h4 class="font-semibold text-blue-400 mb-2">Objectifs</h4>
-                    <ul class="list-disc list-inside text-gray-300 space-y-1">
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Objectifs</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
                         <li>Comprendre ce qu'est JavaScript</li>
                         <li>Savoir où placer le code JavaScript</li>
                         <li>Écrire votre premier script</li>
                     </ul>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Où écrire JavaScript ?</h3>
                     
                     <div class="space-y-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">1. Dans une balise script</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-html">&lt;script&gt;
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2"><i class="fas fa-code mr-2"></i>1. Dans une balise script</h4>
+                            <div class="relative">
+                                <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-html">&lt;script&gt;
   console.log("Hello World !");
 &lt;/script&gt;</code></pre>
+                                <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs" data-code='<script>
+  console.log("Hello World !");
+</script>'>
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
                         </div>
                         
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">2. Dans un fichier externe</h4>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2"><i class="fas fa-file-code mr-2"></i>2. Dans un fichier externe</h4>
                             <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-html">&lt;script src="script.js"&gt;&lt;/script&gt;</code></pre>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">3. Directement dans la console du navigateur</h4>
-                            <p class="text-gray-400 text-sm">Appuyez sur F12 puis allez dans l'onglet Console</p>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-emerald-900/30 border-l-4 border-emerald-500 p-4">
-                    <h4 class="font-semibold text-emerald-400 mb-2">console.log()</h4>
-                    <p class="text-gray-300">C'est la fonction principale pour afficher des informations dans la console du navigateur. Très utile pour le débogage !</p>
+                <!-- Exercice -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-laptop-code text-primary mr-2"></i>Exercice</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Écrivez un code qui affiche "Bonjour" dans la console.</p>
+                    <div class="flex gap-2">
+                        <input type="text" class="exercise-input flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
+                            placeholder="console.log('Bonjour')" data-exercise="intro-ex1" data-answer="console.log('Bonjour')">
+                        <button class="check-exercise px-4 py-2 bg-primary hover:bg-emerald-600 text-white rounded-lg" data-exercise="intro-ex1">
+                            Vérifier
+                        </button>
+                    </div>
+                    <p class="exercise-result mt-2 text-sm hidden"></p>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="intro-q1">
+                        <p class="font-medium mb-3">Quelle fonction permet d'afficher un message dans la console ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="console.log()">console.log()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="print()">print()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="echo()">echo()</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
                 </div>
             </section>
 
             <!-- Lesson 2: Variables -->
             <section id="variables" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 2/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 2/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Les Variables</h2>
-                    <p class="text-gray-400">Les variables sont des conteneurs qui permettent de stocker des données. En JavaScript, on utilise <code class="text-yellow-400">let</code>, <code class="text-yellow-400">const</code> et <code class="text-yellow-400">var</code> pour les déclarer.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les variables sont des conteneurs qui permettent de stocker des données.</p>
                 </div>
                 
-                <div class="bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6">
-                    <h4 class="font-semibold text-blue-400 mb-2">Différence entre let, const et var</h4>
-                    <ul class="list-disc list-inside text-gray-300 space-y-1">
-                        <li><code class="text-yellow-400">let</code> : portée de bloc, peut être modifié</li>
-                        <li><code class="text-yellow-400">const</code> : portée de bloc, constante (ne peut pas être modifié)</li>
-                        <li><code class="text-yellow-400">var</code> : portée fonctionnelle (ancienne méthode, à éviter)</li>
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Différence entre let, const et var</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li><code class="text-yellow-500">let</code> : portée de bloc, peut être modifié</li>
+                        <li><code class="text-yellow-500">const</code> : constante (ne peut pas être modifié)</li>
+                        <li><code class="text-yellow-500">var</code> : portée fonctionnelle (ancienne méthode)</li>
                     </ul>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Exemples</h3>
                     
-                    <div class="grid gap-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Déclarer avec let</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nom = "Alice";
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">Déclarer avec let</h4>
+                            <div class="relative">
+                                <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nom = "Alice";
 let age = 25;
-let estEtudiant = true;
-
-console.log(nom);    // Alice
-console.log(age);     // 25</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let nom = 'Alice'; let age = 25; let estEtudiant = true; console.log('Nom:', nom); console.log('Age:', age); console.log('Est étudiant:', estEtudiant);">Exécuter</button>
+console.log(nom);    // Alice</code></pre>
+                                <button class="copy-btn absolute top-2 right-2 px-2 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let nom = 'Alice'; let age = 25; console.log('Nom:', nom); console.log('Age:', age);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
                         </div>
                         
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Déclarer avec const</h4>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">Déclarer avec const</h4>
                             <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const PI = 3.14159;
 const MESSAGE = "Bienvenue";
-
-console.log(PI);       // 3.14159
-console.log(MESSAGE);   // Bienvenue</code></pre>
+console.log(PI);</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="const PI = 3.14159; const MESSAGE = 'Bienvenue'; console.log('PI:', PI); console.log('Message:', MESSAGE);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-orange-900/30 border-l-4 border-orange-500 p-4">
-                    <h4 class="font-semibold text-orange-400 mb-2">Bonne pratique</h4>
-                    <p class="text-gray-300">Utilisez <code class="text-yellow-400">const</code> par défaut, et <code class="text-yellow-400">let</code> seulement si vous avez besoin de modifier la variable.</p>
+                <!-- Exercice -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-laptop-code text-primary mr-2"></i>Exercice</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Déclarez une variable <code class="text-yellow-500">prenom</code> qui contient "Marie" avec const.</p>
+                    <div class="flex gap-2">
+                        <input type="text" class="exercise-input flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
+                            placeholder="const prenom = 'Marie'" data-exercise="var-ex1" data-answer="const prenom = 'Marie'">
+                        <button class="check-exercise px-4 py-2 bg-primary hover:bg-emerald-600 text-white rounded-lg" data-exercise="var-ex1">
+                            Vérifier
+                        </button>
+                    </div>
+                    <p class="exercise-result mt-2 text-sm hidden"></p>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="var-q1">
+                        <p class="font-medium mb-3">Quelle est la différence principale entre let et const ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="let peut être modifié">let peut être modifié</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="const est plus rapide">const est plus rapide</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="il n'y a pas de différence">Il n'y a pas de différence</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
                 </div>
             </section>
 
             <!-- Lesson 3: Types -->
             <section id="types" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 3/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 3/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Types de Données</h2>
-                    <p class="text-gray-400">JavaScript a plusieurs types de données fondamentaux. Le langage est faiblement typé, donc le type est déterminé automatiquement.</p>
+                    <p class="text-gray-600 dark:text-gray-400">JavaScript a plusieurs types de données fondamentaux.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Les types principaux</h3>
                     
                     <div class="space-y-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-purple-400 mb-2">String (Chaîne de caractères)</h4>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-purple-400 mb-2">String (Texte)</h4>
                             <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let prenom = "Alice";
-let nom = 'Dupont';
-let message = `Bonjour ${prenom} !`;  // Template literal
-
-console.log(typeof prenom);  // string</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let prenom = 'Alice'; let message = 'Bonjour ' + prenom + ' !'; console.log('Type:', typeof prenom); console.log('Message:', message);">Exécuter</button>
+let message = `Bonjour ${prenom} !`;</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let prenom = 'Alice'; let message = 'Bonjour ' + prenom + ' !'; console.log('Type:', typeof prenom); console.log('Message:', message);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
                         </div>
                         
-                        <div class="bg-gray-700/50 p-4 rounded">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
                             <h4 class="font-medium text-purple-400 mb-2">Number (Nombre)</h4>
                             <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let entier = 42;
-let decimal = 3.14;
-let negatif = -10;
-
-console.log(typeof entier);  // number</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let entier = 42; let decimal = 3.14; console.log(' entier:', typeof entier); console.log(' decimal:', typeof decimal);">Exécuter</button>
+let decimal = 3.14;</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let entier = 42; let decimal = 3.14; console.log('entier:', typeof entier); console.log('decimal:', typeof decimal);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
                         </div>
                         
-                        <div class="bg-gray-700/50 p-4 rounded">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
                             <h4 class="font-medium text-purple-400 mb-2">Boolean (Booléen)</h4>
                             <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let estActif = true;
-let estMineur = false;
-
-console.log(typeof estActif);  // boolean</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let estActif = true; let estMineur = false; console.log('estActif:', typeof estActif); console.log('estMineur:', typeof estMineur);">Exécuter</button>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-purple-400 mb-2">Null et Undefined</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let vide = null;       // Intentionnel
-let indefini;          // Non défini
-
-console.log(vide);     // null
-console.log(indefini);  // undefined</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let vide = null; let indefini; console.log('vide:', vide); console.log('indefini:', indefini);">Exécuter</button>
+let estMineur = false;</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let estActif = true; let estMineur = false; console.log('estActif:', typeof estActif); console.log('estMineur:', typeof estMineur);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-blue-900/30 border-l-4 border-blue-500 p-4">
-                    <h4 class="font-semibold text-blue-400 mb-2">Vérifier le type</h4>
-                    <p class="text-gray-300">Utilisez <code class="text-yellow-400">typeof</code> pour connaître le type d'une variable.</p>
+                <!-- Exercice -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-laptop-code text-primary mr-2"></i>Exercice</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Créez une variable <code class="text-yellow-500">temperature</code> qui contient le nombre 25 (sans guillemets).</p>
+                    <div class="flex gap-2">
+                        <input type="text" class="exercise-input flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
+                            placeholder="let temperature = 25" data-exercise="type-ex1" data-answer="let temperature = 25">
+                        <button class="check-exercise px-4 py-2 bg-primary hover:bg-emerald-600 text-white rounded-lg" data-exercise="type-ex1">
+                            Vérifier
+                        </button>
+                    </div>
+                    <p class="exercise-result mt-2 text-sm hidden"></p>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="type-q1">
+                        <p class="font-medium mb-3">Quel est le type de "42" (avec guillemets) ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="number">number</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="string">string</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="boolean">boolean</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
                 </div>
             </section>
 
             <!-- Lesson 4: Conditions -->
             <section id="conditions" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 4/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 4/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Conditions</h2>
-                    <p class="text-gray-400">Les conditions permettent d'exécuter du code en fonction d'un état. Elles utilisent <code class="text-yellow-400">if</code>, <code class="text-yellow-400">else</code> et <code class="text-yellow-400">switch</code>.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les conditions permettent d'exécuter du code en fonction d'un état.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">if / else if / else</h3>
                     
-                    <div class="bg-gray-700/50 p-4 rounded mb-4">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded mb-4">
                         <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let age = 18;
 
 if (age >= 18) {
     console.log("Majeur");
-} else if (age >= 16) {
-    console.log("Adolescent");
 } else {
     console.log("Mineur");
 }</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let age = 18; if (age >= 18) { console.log('Majeur'); } else if (age >= 16) { console.log('Adolescent'); } else { console.log('Mineur'); }">Exécuter</button>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let age = 18; if (age >= 18) { console.log('Majeur'); } else { console.log('Mineur'); }">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Opérateurs de comparaison</h3>
                     
-                    <div class="grid grid-cols-2 gap-4 text-sm">
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">==</code> <span class="text-gray-400">Égal (valeur)</span>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">==</code> <span class="text-gray-500">Égal</span>
                         </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">===</code> <span class="text-gray-400">Égal (valeur + type)</span>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">===</code> <span class="text-gray-500">Strict</span>
                         </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">!=</code> <span class="text-gray-400">Différent (valeur)</span>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">!=</code> <span class="text-gray-500">Différent</span>
                         </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">!==</code> <span class="text-gray-400">Différent (valeur + type)</span>
-                        </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">&gt;</code> <span class="text-gray-400">Supérieur</span>
-                        </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">&lt;</code> <span class="text-gray-400">Inférieur</span>
-                        </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">&gt;=</code> <span class="text-gray-400">Supérieur ou égal</span>
-                        </div>
-                        <div class="bg-gray-700/30 p-3 rounded">
-                            <code class="text-yellow-400">&lt;=</code> <span class="text-gray-400">Inférieur ou égal</span>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">&gt;</code> <span class="text-gray-500">Supérieur</span>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">Switch</h3>
-                    
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let jour = 1;
-
-switch(jour) {
-    case 1:
-        console.log("Lundi");
-        break;
-    case 2:
-        console.log("Mardi");
-        break;
-    default:
-        console.log("Autre jour");
-}</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let jour = 1; switch(jour) { case 1: console.log('Lundi'); break; case 2: console.log('Mardi'); break; default: console.log('Autre jour'); }">Exécuter</button>
+                <!-- Exercice -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-laptop-code text-primary mr-2"></i>Exercice</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Complétez pour afficher "Adulte" si age >= 18.</p>
+                    <div class="flex gap-2">
+                        <input type="text" class="exercise-input flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary" 
+                            placeholder="if (age >= 18) { console.log('Adulte'); }" data-exercise="cond-ex1" data-answer="if (age >= 18) { console.log('Adulte'); }">
+                        <button class="check-exercise px-4 py-2 bg-primary hover:bg-emerald-600 text-white rounded-lg" data-exercise="cond-ex1">
+                            Vérifier
+                        </button>
+                    </div>
+                    <p class="exercise-result mt-2 text-sm hidden"></p>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="cond-q1">
+                        <p class="font-medium mb-3">Quel opérateur vérifie l'égalité en valeur ET en type ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="==">==</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="===">===</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="=">=</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
                     </div>
                 </div>
             </section>
@@ -314,63 +467,68 @@ switch(jour) {
             <!-- Lesson 5: Boucles -->
             <section id="boucles" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 5/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 5/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Boucles</h2>
-                    <p class="text-gray-400">Les boucles permettent de répéter du code plusieurs fois. JavaScript offre plusieurs types de boucles.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les boucles permettent de répéter du code plusieurs fois.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">for</h3>
-                    <p class="text-gray-400 mb-4">Idéale quand on connaît le nombre d'itérations.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Idéale quand on connaît le nombre d'itérations.</p>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// for (initialisation; condition; incrémentation)
-for (let i = 0; i < 5; i++) {
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">for (let i = 0; i < 3; i++) {
     console.log("Itération " + i);
 }</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="for (let i = 0; i < 5; i++) { console.log('Itération ' + i); }">Exécuter</button>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="for (let i = 0; i < 3; i++) { console.log('Itération ' + i); }">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">while</h3>
-                    <p class="text-gray-400 mb-4">Répète tant que la condition est vraie.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Répète tant que la condition est vraie.</p>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
                         <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let i = 0;
 while (i < 3) {
     console.log("Compteur: " + i);
     i++;
 }</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let i = 0; while (i < 3) { console.log('Compteur: ' + i); i++; }">Exécuter</button>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let i = 0; while (i < 3) { console.log('Compteur: ' + i); i++; }">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">do...while</h3>
-                    <p class="text-gray-400 mb-4">Exécute AU MOINS une fois, puis teste la condition.</p>
-                    
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let i = 0;
-do {
-    console.log("Valeur: " + i);
-    i++;
-} while (i < 3);</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let i = 0; do { console.log('Valeur: ' + i); i++; } while (i < 3);">Exécuter</button>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg p-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">for...of</h3>
-                    <p class="text-gray-400 mb-4">Itère sur les éléments d'un tableau.</p>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Itère sur les éléments d'un tableau.</p>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let fruits = ["pomme", "banane", "orange"];
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let fruits = ["pomme", "banane"];
 
 for (let fruit of fruits) {
     console.log(fruit);
 }</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let fruits = ['pomme', 'banane', 'orange']; for (let fruit of fruits) { console.log(fruit); }">Exécuter</button>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let fruits = ['pomme', 'banane']; for (let fruit of fruits) { console.log(fruit); }">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="boucle-q1">
+                        <p class="font-medium mb-3">Quelle boucle s'exécute au moins une fois ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="for">for</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="while">while</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="do...while">do...while</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
                     </div>
                 </div>
             </section>
@@ -378,138 +536,109 @@ for (let fruit of fruits) {
             <!-- Lesson 6: Fonctions -->
             <section id="fonctions" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 6/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 6/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Fonctions</h2>
-                    <p class="text-gray-400">Les fonctions sont des blocs de code réutilisables. Elles peuvent être declarées de plusieurs façons.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les fonctions sont des blocs de code réutilisables.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Fonction nommé</h3>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
                         <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">function saluer(nom) {
-    return "Bonjour " + nom + " !";
+    return "Bonjour " + nom;
 }
 
-let message = saluer("Alice");
-console.log(message);</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="function saluer(nom) { return 'Bonjour ' + nom + ' !'; } let message = saluer('Alice'); console.log(message);">Exécuter</button>
+console.log(saluer("Alice"));</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="function saluer(nom) { return 'Bonjour ' + nom; } console.log(saluer('Alice'));">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Fonction anonyme</h3>
-                    <p class="text-gray-400 mb-4">Stockée dans une variable.</p>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Fonction fléchée</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Syntaxe courte très utilisée.</p>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const direBonjour = function(nom) {
-    return "Salut " + nom;
-};
-
-console.log(direBonjour("Bob"));</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="const direBonjour = function(nom) { return 'Salut ' + nom; }; console.log(direBonjour('Bob'));">Exécuter</button>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Fonction fléchée (Arrow Function)</h3>
-                    <p class="text-gray-400 mb-4">Syntaxe courte, très utilisée en moderne JavaScript.</p>
-                    
-                    <div class="space-y-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Avec plusieurs instructions</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const addition = (a, b) => {
-    let resultat = a + b;
-    return resultat;
-};
-
-console.log(addition(5, 3));</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="const addition = (a, b) => { let resultat = a + b; return resultat; }; console.log(addition(5, 3));">Exécuter</button>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Syntaxe courte (un seul paramètre)</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const carre = x => x * x;
-
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const carre = x => x * x;
 console.log(carre(4));  // 16</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="const carre = x => x * x; console.log(carre(4));">Exécuter</button>
-                        </div>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="const carre = x => x * x; console.log(carre(4));">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-blue-900/30 border-l-4 border-blue-500 p-4">
-                    <h4 class="font-semibold text-blue-400 mb-2">Paramètres par défaut</h4>
-                    <p class="text-gray-300">function dire(nom = "Inconnu") { ... }</p>
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="func-q1">
+                        <p class="font-medium mb-3">Quelle est la syntaxe correcte d'une arrow function ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="const f = () => {}">const f = () => {}</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="function => ()">function => ()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="=> function()">=> function()</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
                 </div>
             </section>
 
             <!-- Lesson 7: Tableaux -->
             <section id="tableaux" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 7/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 7/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Tableaux</h2>
-                    <p class="text-gray-400">Les tableaux (Array) permettent de stocker plusieurs valeurs dans une seule variable.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les tableaux permettent de stocker plusieurs valeurs.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Créer un tableau</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Méthodes utiles</h3>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let fruits = ["pomme", "banane", "orange"];
-
-console.log(fruits[0]);   // pomme (index 0)
-console.log(fruits.length); // 3</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let fruits = ['pomme', 'banane', 'orange']; console.log('Premier:', fruits[0]); console.log('Longueur:', fruits.length);">Exécuter</button>
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">push() - Ajouter</h4>
+                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let fruits = ["pomme"];
+fruits.push("banane");
+console.log(fruits);</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let fruits = ['pomme']; fruits.push('banane'); console.log(fruits);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">map() - Transformer</h4>
+                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nums = [1, 2, 3];
+let doublés = nums.map(n => n * 2);
+console.log(doublés);</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let nums = [1, 2, 3]; let doublés = nums.map(n => n * 2); console.log(doublés);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">filter() - Filtrer</h4>
+                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nums = [1, 2, 3, 4];
+let pairs = nums.filter(n => n % 2 === 0);
+console.log(pairs);</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let nums = [1, 2, 3, 4]; let pairs = nums.filter(n => n % 2 === 0); console.log(pairs);">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
+                        </div>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Méthodes utiles</h3>
-                    
-                    <div class="grid gap-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">push() - Ajouter à la fin</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let couleurs = ["rouge", "vert"];
-couleurs.push("bleu");
-console.log(couleurs);</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let couleurs = ['rouge', 'vert']; couleurs.push('bleu'); console.log(couleurs);">Exécuter</button>
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="tab-q1">
+                        <p class="font-medium mb-3">Quelle méthode ajout un élément à la fin du tableau ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="push()">push()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="pop()">pop()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="shift()">shift()</button>
                         </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">pop() - Retirer le dernier</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nombres = [1, 2, 3];
-nombres.pop();
-console.log(nombres);</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let nombres = [1, 2, 3]; nombres.pop(); console.log(nombres);">Exécuter</button>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">forEach() - Parcourir</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let animaux = ["chat", "chien"];
-
-animaux.forEach(animal => {
-    console.log(animal);
-});</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let animaux = ['chat', 'chien']; animaux.forEach(animal => { console.log(animal); });">Exécuter</button>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">map() - Transformer</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nombres = [1, 2, 3];
-let doublés = nombres.map(n => n * 2);
-
-console.log(doublés);</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let nombres = [1, 2, 3]; let doublés = nombres.map(n => n * 2); console.log(doublés);">Exécuter</button>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">filter() - Filtrer</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let nombres = [1, 2, 3, 4, 5];
-let pairs = nombres.filter(n => n % 2 === 0);
-
-console.log(pairs);</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let nombres = [1, 2, 3, 4, 5]; let pairs = nombres.filter(n => n % 2 === 0); console.log(pairs);">Exécuter</button>
-                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
                     </div>
                 </div>
             </section>
@@ -517,66 +646,39 @@ console.log(pairs);</code></pre>
             <!-- Lesson 8: Objets -->
             <section id="objets" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 8/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 8/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Objets</h2>
-                    <p class="text-gray-400">Les objets permettent de stocker des données sous forme de paires clé-valeur. C'est la base de JavaScript.</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les objets permettent de stocker des données sous forme de paires clé-valeur.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Créer un objet</h3>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
                         <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let personne = {
     nom: "Alice",
-    age: 25,
-    ville: "Paris"
+    age: 25
 };
 
 console.log(personne.nom);
 console.log(personne["age"]);</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let personne = { nom: 'Alice', age: 25, ville: 'Paris' }; console.log('Nom:', personne.nom); console.log('Age:', personne['age']);">Exécuter</button>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="let personne = { nom: 'Alice', age: 25 }; console.log('Nom:', personne.nom); console.log('Age:', personne['age']);">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Méthodes dans un objet</h3>
-                    
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let personne = {
-    nom: "Alice",
-    age: 25,
-    saluer: function() {
-        return "Bonjour, je suis " + this.nom;
-    }
-};
-
-console.log(personne.saluer());</code></pre>
-                        <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let personne = { nom: 'Alice', age: 25, saluer: function() { return 'Bonjour, je suis ' + this.nom; } }; console.log(personne.saluer());">Exécuter</button>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">Parcourir un objet</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">for...in</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let personne = { nom: "Bob", age: 30 };
-
-for (let cle in personne) {
-    console.log(cle + ": " + personne[cle]);
-}</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let personne = { nom: 'Bob', age: 30 }; for (let cle in personne) { console.log(cle + ': ' + personne[cle]); }">Exécuter</button>
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="obj-q1">
+                        <p class="font-medium mb-3">Comment accéder à la propriété "nom" d'un objet ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="objet.nom">objet.nom</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="objet[nom]">objet[nom]</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="objet->nom">objet->nom</button>
                         </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Object.keys() / Object.values()</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">let personne = { nom: "Bob", age: 30 };
-
-console.log(Object.keys(personne));
-console.log(Object.values(personne));</code></pre>
-                            <button class="run-btn mt-2 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 rounded text-sm" data-code="let personne = { nom: 'Bob', age: 30 }; console.log('Clés:', Object.keys(personne)); console.log('Valeurs:', Object.values(personne));">Exécuter</button>
-                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
                     </div>
                 </div>
             </section>
@@ -584,76 +686,34 @@ console.log(Object.values(personne));</code></pre>
             <!-- Lesson 9: DOM -->
             <section id="dom" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 9/10</span>
-                    <h2 class="text-3xl font-bold mt-2 mb-4">DOM (Document Object Model)</h2>
-                    <p class="text-gray-400">Le DOM permet de manipuler le contenu HTML avec JavaScript. Chaque élément HTML est un objet accessible.</p>
+                    <span class="text-primary text-sm font-medium">Leçon 9/10</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">DOM</h2>
+                    <p class="text-gray-600 dark:text-gray-400">Le DOM permet de manipuler le contenu HTML avec JavaScript.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
                     <h3 class="text-xl font-semibold mb-4">Sélectionner des éléments</h3>
                     
-                    <div class="space-y-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">getElementById</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// &lt;div id="titre"&gt;
-// &lt;/div&gt;
-
-document.getElementById("titre");</code></pre>
+                    <div class="space-y-3">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded">
+                            <code class="text-yellow-500">document.getElementById("id")</code>
                         </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">querySelector</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Premier élément .classe
-document.querySelector(".maClasse");
-
-// Premier &lt;p&gt;
-document.querySelector("p");</code></pre>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded">
+                            <code class="text-yellow-500">document.querySelector(".classe")</code>
                         </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">querySelectorAll</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Tous les éléments .classe
-document.querySelectorAll(".maClasse");</code></pre>
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-3 rounded">
+                            <code class="text-yellow-500">document.querySelectorAll("p")</code>
                         </div>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Manipuler le contenu</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Manipuler</h3>
                     
-                    <div class="space-y-4">
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">innerHTML vs textContent</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.innerHTML = "&lt;b&gt;Gras&lt;/b&gt;"; // HTML interprété
-element.textContent = "Texte brut"; // Pas d'interprétation</code></pre>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Modifier les attributs</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.getAttribute("src");
-element.setAttribute("alt", "Image");</code></pre>
-                        </div>
-                        
-                        <div class="bg-gray-700/50 p-4 rounded">
-                            <h4 class="font-medium text-yellow-400 mb-2">Modifier le style CSS</h4>
-                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.style.color = "blue";
-element.style.backgroundColor = "#fff";</code></pre>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">Créer des éléments</h3>
-                    
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Créer un élément
-let div = document.createElement("div");
-
-// Ajouter du contenu
-div.textContent = "Nouvelle div";
-
-// L'ajouter au parent
-document.body.appendChild(div);</code></pre>
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.textContent = "Nouveau texte";
+element.style.color = "blue";
+element.classList.add("active");</code></pre>
                     </div>
                 </div>
             </section>
@@ -661,78 +721,380 @@ document.body.appendChild(div);</code></pre>
             <!-- Lesson 10: Events -->
             <section id="events" class="lesson-content">
                 <div class="mb-8">
-                    <span class="text-emerald-400 text-sm font-medium">Leçon 10/10</span>
+                    <span class="text-primary text-sm font-medium">Leçon 10/10</span>
                     <h2 class="text-3xl font-bold mt-2 mb-4">Événements</h2>
-                    <p class="text-gray-400">Les événements permettent de réagir aux actions de l'utilisateur (clic, saisie, etc.)</p>
+                    <p class="text-gray-600 dark:text-gray-400">Les événements permettent de réagir aux actions de l'utilisateur.</p>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Types d'événements</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">addEventListener</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Méthode recommandée.</p>
                     
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="bg-gray-700/30 p-4 rounded">
-                            <h4 class="font-medium text-purple-400 mb-2">Souris</h4>
-                            <code class="text-yellow-400">click</code>, <code class="text-yellow-400">dblclick</code>, 
-                            <code class="text-yellow-400">mouseover</code>, <code class="text-yellow-400">mouseout</code>
-                        </div>
-                        <div class="bg-gray-700/30 p-4 rounded">
-                            <h4 class="font-medium text-purple-400 mb-2">Clavier</h4>
-                            <code class="text-yellow-400">keydown</code>, <code class="text-yellow-400">keyup</code>
-                        </div>
-                        <div class="bg-gray-700/30 p-4 rounded">
-                            <h4 class="font-medium text-purple-400 mb-2">Formulaire</h4>
-                            <code class="text-yellow-400">submit</code>, <code class="text-yellow-400">focus</code>, <code class="text-yellow-400">blur</code>
-                        </div>
-                        <div class="bg-gray-700/30 p-4 rounded">
-                            <h4 class="font-medium text-purple-400 mb-2">Fenêtre</h4>
-                            <code class="text-yellow-400">load</code>, <code class="text-yellow-400">resize</code>, <code class="text-yellow-400">scroll</code>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Méthode 1: onEvent</h3>
-                    
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.onclick = function() {
-    console.log("Clic détecté !");
-};</code></pre>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-800 rounded-lg p-6 mb-6">
-                    <h3 class="text-xl font-semibold mb-4">Méthode 2: addEventListener</h3>
-                    <p class="text-gray-400 mb-4">Méthode recommandée, permet plusieurs écouteurs.</p>
-                    
-                    <div class="bg-gray-700/50 p-4 rounded">
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
                         <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.addEventListener("click", function() {
-    console.log("Clic !");
-});
-
-element.addEventListener("click", () => {
-    console.log("Autre écouteur");
+    console.log("Clic détecté !");
 });</code></pre>
                     </div>
                 </div>
                 
-                <div class="bg-gray-800 rounded-lg p-6">
-                    <h3 class="text-xl font-semibold mb-4">Objet Event</h3>
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Types d'événements</h3>
                     
-                    <div class="bg-gray-700/50 p-4 rounded">
-                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">element.addEventListener("click", function(e) {
-    console.log(e.target);    // Élément cliqué
-    console.log(e.type);     // "click"
-    console.log(e.clientX);  // Coordinnée X
-    console.log(e.clientY);  // Coordinnée Y
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <span class="text-purple-400">Souris:</span> click, dblclick
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <span class="text-purple-400">Clavier:</span> keydown, keyup
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <span class="text-purple-400">Formulaire:</span> submit, focus
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <span class="text-purple-400">Fenêtre:</span> load, resize
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 11: Formulaires -->
+            <section id="formulaires" class="lesson-content">
+                <div class="mb-8">
+                    <span class="text-primary text-sm font-medium">Leçon 11/14</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">Formulaires</h2>
+                    <p class="text-gray-600 dark:text-gray-400">Les formulaires permettent de collecter des données utilisateur.</p>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Événements de formulaire</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li><code class="text-yellow-500">submit</code> - Soumission du formulaire</li>
+                        <li><code class="text-yellow-500">input</code> - Modification d'un champ</li>
+                        <li><code class="text-yellow-500">change</code> - Changement de valeur</li>
+                        <li><code class="text-yellow-500">focus</code> - Focus sur un champ</li>
+                        <li><code class="text-yellow-500">blur</code> - Perte du focus</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Récupérer les valeurs</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Via FormData
+const form = document.getElementById("monForm");
+form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const data = new FormData(form);
+    console.log(data.get("nom"));
+    console.log(data.get("email"));
+});
+
+// Directement
+const email = document.getElementById("email").value;
+console.log(email);</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="const form = { nom: 'Alice', email: 'alice@email.com' }; console.log('Nom:', form.nom); console.log('Email:', form.email);">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Validation</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Vérifier si un champ est rempli
+if (nom.value === "") {
+    alert("Le nom est requis");
+}
+
+// Vérifier le format email
+const email = "test@email.com";
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+console.log(emailRegex.test(email));</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="const email = 'test@email.com'; const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/; console.log('Email valide:', emailRegex.test(email));">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Exemple complet</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const form = document.querySelector("form");
+form.addEventListener("submit", function(e) {
+    e.preventDefault();
+    const nom = document.getElementById("nom").value;
+    const email = document.getElementById("email").value;
+    console.log("Soumis:", nom, email);
 });</code></pre>
                     </div>
                 </div>
             </section>
 
+            <!-- Lesson 12: localStorage -->
+            <section id="localstorage" class="lesson-content">
+                <div class="mb-8">
+                    <span class="text-primary text-sm font-medium">Leçon 12/14</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">localStorage</h2>
+                    <p class="text-gray-600 dark:text-gray-400">localStorage permet de stocker des données persistantes dans le navigateur.</p>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Caractéristiques</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>Données persistantes (jamais expirées)</li>
+                        <li>Stockage maximal ~5MB</li>
+                        <li>Stocke uniquement des chaînes</li>
+                        <li>Accessible depuis le même domaine</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"> Méthodes</h3>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">setItem() - Sauvegarder</h4>
+                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">localStorage.setItem("nom", "Alice");
+localStorage.setItem("age", "25");</code></pre>
+                            <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="localStorage.setItem('nom', 'Alice'); localStorage.setItem('age', '25'); console.log('Données sauvegardées'); console.log('Nom:', localStorage.getItem('nom'));">
+                                <i class="fas fa-play mr-1"></i>Exécuter
+                            </button>
+                        </div>
+                        
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">getItem() - Récupérer</h4>
+                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const nom = localStorage.getItem("nom");
+console.log(nom);</code></pre>
+                        </div>
+                        
+                        <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                            <h4 class="font-medium text-yellow-500 mb-2">removeItem() - Supprimer</h4>
+                            <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">localStorage.removeItem("nom");
+localStorage.clear(); // Tout effacer</code></pre>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Stocker des objets</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">JSON.stringify() et JSON.parse()</p>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">const utilisateur = {
+    nom: "Alice",
+    age: 25,
+    ville: "Paris"
+};
+
+// Sauvegarder (convertir en JSON)
+localStorage.setItem("utilisateur", JSON.stringify(utilisateur));
+
+// Récupérer (convertir en objet)
+const data = JSON.parse(localStorage.getItem("utilisateur"));
+console.log(data.nom);</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="const utilisateur = { nom: 'Alice', age: 25, ville: 'Paris' }; localStorage.setItem('utilisateur', JSON.stringify(utilisateur)); const data = JSON.parse(localStorage.getItem('utilisateur')); console.log('Nom:', data.nom); console.log('Ville:', data.ville);">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="local-q1">
+                        <p class="font-medium mb-3">Quelle méthode permet de sauvegarder une donnée dans localStorage ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="setItem()">localStorage.setItem()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="save()">localStorage.save()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="write()">localStorage.write()</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 13: sessionStorage -->
+            <section id="sessionstorage" class="lesson-content">
+                <div class="mb-8">
+                    <span class="text-primary text-sm font-medium">Leçon 13/14</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">sessionStorage</h2>
+                    <p class="text-gray-600 dark:text-gray-400">sessionStorage fonctionne comme localStorage mais les données sont effacées à la fermeture du navigateur.</p>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Différence avec localStorage</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>Données effacées à la fermeture de l'onglet</li>
+                        <li>Méthodes identiques (setItem, getItem, removeItem)</li>
+                        <li>Utile pour des données temporaires</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Utilisation</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Même syntaxe que localStorage
+sessionStorage.setItem("token", "abc123");
+sessionStorage.setItem("panier", JSON.stringify([
+    { produit: "Livre", prix: 15 },
+    { produit: "Cahier", prix: 5 }
+]));
+
+const token = sessionStorage.getItem("token");
+const panier = JSON.parse(sessionStorage.getItem("panier"));
+
+console.log("Token:", token);
+console.log("Panier:", panier);</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="sessionStorage.setItem('token', 'abc123'); sessionStorage.setItem('panier', JSON.stringify([{produit: 'Livre', prix: 15}])); const token = sessionStorage.getItem('token'); const panier = JSON.parse(sessionStorage.getItem('panier')); console.log('Token:', token); console.log('Panier:', panier);">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-orange-50 dark:bg-orange-900/30 border-l-4 border-orange-500 p-4">
+                    <h4 class="font-semibold text-orange-600 dark:text-orange-400 mb-2">Quand utiliser sessionStorage ?</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>Panier d'achat temporaire</li>
+                        <li>Token de session</li>
+                        <li>Données de formulaire non soumises</li>
+                        <li>State temporaire d'une application</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Lesson 14: POO -->
+            <section id="poo" class="lesson-content">
+                <div class="mb-8">
+                    <span class="text-primary text-sm font-medium">Leçon 14/14</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">Programmation Orientée Objet</h2>
+                    <p class="text-gray-600 dark:text-gray-400">La POO permet de structurer le code autour d'objets.</p>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Concepts clés</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li><code class="text-yellow-500">Classe</code> - Plan de construction</li>
+                        <li><code class="text-yellow-500">Objet</code> - Instance d'une classe</li>
+                        <li><code class="text-yellow-500">Héritage</code> - Réutiliser le code</li>
+                        <li><code class="text-yellow-500">Encapsulation</code> - Cacher les données</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Créer une classe</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">class Personne {
+    constructor(nom, age) {
+        this.nom = nom;
+        this.age = age;
+    }
+    
+    saluer() {
+        return "Bonjour, je suis " + this.nom;
+    }
+}
+
+// Créer un objet
+const alice = new Personne("Alice", 25);
+console.log(alice.nom);
+console.log(alice.saluer());</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="class Personne { constructor(nom, age) { this.nom = nom; this.age = age; } saluer() { return 'Bonjour, je suis ' + this.nom; } } const alice = new Personne('Alice', 25); console.log('Nom:', alice.nom); console.log('Salutation:', alice.saluer());">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Héritage</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Créer une classe basée sur une autre.</p>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">class Animal {
+    constructor(nom) {
+        this.nom = nom;
+    }
+    
+    parler() {
+        return "...";
+    }
+}
+
+class Chien extends Animal {
+    constructor(nom, race) {
+        super(nom); // Appeler le constructeur parent
+        this.race = race;
+    }
+    
+    parler() {
+        return "Woof !";
+    }
+}
+
+const medor = new Chien("Médor", "Labrador");
+console.log(medor.nom);
+console.log(medor.parler());</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="class Animal { constructor(nom) { this.nom = nom; } parler() { return '...'; } } class Chien extends Animal { constructor(nom, race) { super(nom); this.race = race; } parler() { return 'Woof !'; } } const medor = new Chien('Médor', 'Labrador'); console.log('Nom:', medor.nom); console.log('Race:', medor.race); console.log('Son:', medor.parler());">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Getters et Setters</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">class Rectangle {
+    constructor(largeur, hauteur) {
+        this.largeur = largeur;
+        this.hauteur = hauteur;
+    }
+    
+    // Getter
+    get surface() {
+        return this.largeur * this.hauteur;
+    }
+    
+    // Setter
+    set dimensions({largeur, hauteur}) {
+        this.largeur = largeur;
+        this.hauteur = hauteur;
+    }
+}
+
+const rect = new Rectangle(10, 5);
+console.log("Surface:", rect.surface);
+
+rect.dimensions = {largeur: 20, hauteur: 10};
+console.log("Nouvelle surface:", rect.surface);</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="class Rectangle { constructor(largeur, hauteur) { this.largeur = largeur; this.hauteur = hauteur; } get surface() { return this.largeur * this.hauteur; } set dimensions({largeur, hauteur}) { this.largeur = largeur; this.hauteur = hauteur; } } const rect = new Rectangle(10, 5); console.log('Surface:', rect.surface); rect.dimensions = {largeur: 20, hauteur: 10}; console.log('Nouvelle surface:', rect.surface);">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="poo-q1">
+                        <p class="font-medium mb-3">Quel mot-clé permet de créer une classe qui hérite d'une autre classe ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="extends">extends</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="inherits">inherits</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="super">super</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Console Output -->
-            <div class="mt-8 pt-8 border-t border-gray-700">
+            <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                    <i class="fas fa-terminal text-gray-400"></i>
                     Console
                 </h3>
                 <div id="consoleOutput" class="bg-gray-950 p-4 rounded-lg font-mono text-sm min-h-[100px] text-gray-300">
@@ -742,34 +1104,95 @@ element.addEventListener("click", () => {
 
             <!-- Navigation Buttons -->
             <div class="flex justify-between mt-8">
-                <button id="prevBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-lg opacity-50" disabled>
-                    ← Précédent
+                <button id="prevBtn" class="px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 rounded-lg opacity-50" disabled>
+                    <i class="fas fa-arrow-left mr-2"></i>Précédent
                 </button>
-                <button id="nextBtn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg">
-                    Suivant →
+                <button id="nextBtn" class="px-4 py-2 bg-primary hover:bg-emerald-600 text-white rounded-lg">
+                    Suivant<i class="fas fa-arrow-right ml-2"></i>
                 </button>
             </div>
         </div>
     </main>
 
     <script>
-        // Navigation entre lessons
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        if (localStorage.getItem('theme') === 'light') {
+            html.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            html.classList.toggle('dark');
+            localStorage.setItem('theme', html.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // Mobile Sidebar
+        const sidebar = document.getElementById('sidebar');
+        const menuBtn = document.getElementById('menuBtn');
+        const overlay = document.getElementById('overlay');
+        
+        function toggleSidebar() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('hidden');
+        }
+        
+        menuBtn?.addEventListener('click', toggleSidebar);
+        overlay?.addEventListener('click', toggleSidebar);
+
+        // Progress Tracking
+        const TOTAL_LESSONS = 14;
+        let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+        
+        function updateProgress() {
+            const progress = (completedLessons.length / TOTAL_LESSONS) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+            document.getElementById('sidebarProgress').style.width = progress + '%';
+            document.getElementById('progressText').textContent = Math.round(progress) + '%';
+            
+            document.querySelectorAll('.lesson-btn').forEach((btn, i) => {
+                const icon = btn.querySelector('.completed-icon');
+                if (completedLessons.includes(i)) {
+                    icon?.classList.remove('hidden');
+                } else {
+                    icon?.classList.add('hidden');
+                }
+            });
+        }
+        
+        function markCompleted(lessonIndex) {
+            if (!completedLessons.includes(lessonIndex)) {
+                completedLessons.push(lessonIndex);
+                localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+                updateProgress();
+            }
+        }
+
+        // Navigation
         const lessonContents = document.querySelectorAll('.lesson-content');
         const lessonButtons = document.querySelectorAll('.lesson-btn');
         const prevBtn = document.getElementById('prevBtn');
         const nextBtn = document.getElementById('nextBtn');
-        let currentLesson = 0;
+        let currentLesson = parseInt(localStorage.getItem('currentLesson') || '0');
 
         function showLesson(index) {
+            if (index < 0 || index >= lessonContents.length) return;
+            
             lessonContents.forEach((content, i) => {
                 content.classList.toggle('active', i === index);
             });
             lessonButtons.forEach((btn, i) => {
-                btn.classList.toggle('bg-gray-700', i === index);
-                btn.classList.toggle('bg-gray-600', i === index);
+                btn.classList.toggle('bg-primary', i === index);
+                btn.classList.toggle('text-white', i === index);
+                btn.classList.toggle('bg-gray-100', i !== index);
+                btn.classList.toggle('dark:bg-gray-700', i !== index);
+                btn.classList.toggle('dark:text-gray-300', i !== index);
             });
             
             currentLesson = index;
+            localStorage.setItem('currentLesson', index);
+            
             prevBtn.disabled = index === 0;
             prevBtn.classList.toggle('opacity-50', index === 0);
             
@@ -777,21 +1200,35 @@ element.addEventListener("click", () => {
             nextBtn.classList.toggle('opacity-50', index === lessonContents.length - 1);
             
             window.scrollTo(0, 0);
+            
+            if (window.innerWidth < 768) {
+                sidebar.classList.remove('open');
+                overlay.classList.add('hidden');
+            }
         }
 
         lessonButtons.forEach((btn, i) => {
             btn.addEventListener('click', () => showLesson(i));
         });
 
-        prevBtn.addEventListener('click', () => {
-            if (currentLesson > 0) showLesson(currentLesson - 1);
-        });
-
+        prevBtn.addEventListener('click', () => showLesson(currentLesson - 1));
         nextBtn.addEventListener('click', () => {
+            markCompleted(currentLesson);
             if (currentLesson < lessonContents.length - 1) showLesson(currentLesson + 1);
         });
 
-        // Exécuter le code
+        // Reset Progress
+        document.getElementById('resetProgress')?.addEventListener('click', () => {
+            if (confirm('Réinitialiser toute la progression ?')) {
+                localStorage.removeItem('completedLessons');
+                localStorage.removeItem('currentLesson');
+                completedLessons = [];
+                showLesson(0);
+                updateProgress();
+            }
+        });
+
+        // Console Output
         const consoleOutput = document.getElementById('consoleOutput');
 
         document.querySelectorAll('.run-btn').forEach(btn => {
@@ -809,7 +1246,6 @@ element.addEventListener("click", () => {
                     };
                     
                     eval(code);
-                    
                     console.log = originalLog;
                     
                     if (logs.length > 0) {
@@ -817,7 +1253,7 @@ element.addEventListener("click", () => {
                             `<div class="border-b border-gray-800 py-1">${log}</div>`
                         ).join('');
                     } else {
-                        consoleOutput.innerHTML = '<span class="text-gray-500">Code exécuté (pas de sortie)</span>';
+                        consoleOutput.innerHTML = '<span class="text-gray-500">Code exécuté</span>';
                     }
                 } catch (error) {
                     consoleOutput.innerHTML = `<div class="text-red-400">Erreur: ${error.message}</div>`;
@@ -825,8 +1261,143 @@ element.addEventListener("click", () => {
             });
         });
 
-        // Initialiser
-        showLesson(0);
+        // Copy Code
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                navigator.clipboard.writeText(btn.dataset.code);
+                btn.innerHTML = '<i class="fas fa-check"></i>';
+                setTimeout(() => btn.innerHTML = '<i class="fas fa-copy"></i>', 2000);
+            });
+        });
+
+        // Exercises
+        document.querySelectorAll('.check-exercise').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const exerciseId = btn.dataset.exercise;
+                const input = document.querySelector(`input[data-exercise="${exerciseId}"]`);
+                const expectedAnswer = input.dataset.answer.toLowerCase().replace(/\s+/g, '');
+                const userAnswer = input.value.toLowerCase().replace(/\s+/g, '');
+                const result = input.parentElement.querySelector('.exercise-result');
+                
+                if (userAnswer === expectedAnswer) {
+                    input.classList.add('correct');
+                    input.classList.remove('incorrect');
+                    result.textContent = '✓ Correct ! Bien joué !';
+                    result.className = 'exercise-result mt-2 text-sm text-green-500';
+                    result.classList.remove('hidden');
+                } else {
+                    input.classList.add('incorrect');
+                    input.classList.remove('correct');
+                    result.textContent = '✗ Incorrect. Réessayez !';
+                    result.className = 'exercise-result mt-2 text-sm text-red-500';
+                    result.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Quiz
+        const quizAnswers = {
+            'intro-q1': 'console.log()',
+            'var-q1': 'let peut être modifié',
+            'type-q1': 'string',
+            'cond-q1': '===',
+            'boucle-q1': 'do...while',
+            'func-q1': 'const f = () => {}',
+            'tab-q1': 'push()',
+            'obj-q1': 'objet.nom',
+            'local-q1': 'setItem()',
+            'poo-q1': 'extends'
+        };
+
+        document.querySelectorAll('.quiz-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const question = option.closest('.quiz-question');
+                const questionId = question.dataset.quiz;
+                const result = question.querySelector('.quiz-result');
+                const correctAnswer = quizAnswers[questionId];
+                const userAnswer = option.dataset.answer;
+                
+                question.querySelectorAll('.quiz-option').forEach(opt => {
+                    opt.classList.remove('selected', 'bg-green-500', 'border-green-500');
+                    opt.classList.add('bg-gray-50', 'dark:bg-gray-700');
+                });
+                
+                if (userAnswer === correctAnswer) {
+                    option.classList.add('selected', 'bg-green-500', 'border-green-500');
+                    result.textContent = '✓ Correct !';
+                    result.className = 'quiz-result mt-3 text-sm font-medium text-green-500';
+                    result.classList.remove('hidden');
+                } else {
+                    option.classList.add('bg-red-500', 'border-red-500');
+                    result.textContent = '✗ Incorrect. La réponse était: ' + correctAnswer;
+                    result.className = 'quiz-result mt-3 text-sm font-medium text-red-500';
+                    result.classList.remove('hidden');
+                }
+            });
+        });
+
+        // Search
+        const searchInput = document.getElementById('searchInput');
+        const searchResults = document.getElementById('searchResults');
+        
+        const lessons = [
+            { title: 'Introduction', index: 0, keywords: ['javascript', 'intro', 'premier script', 'console'] },
+            { title: 'Variables', index: 1, keywords: ['let', 'const', 'var', 'variable', 'déclarer'] },
+            { title: 'Types de données', index: 2, keywords: ['string', 'number', 'boolean', 'type', 'null', 'undefined'] },
+            { title: 'Conditions', index: 3, keywords: ['if', 'else', 'switch', 'condition', 'comparaison'] },
+            { title: 'Boucles', index: 4, keywords: ['for', 'while', 'boucle', 'itération', 'do'] },
+            { title: 'Fonctions', index: 5, keywords: ['function', 'arrow', 'return', 'paramètre'] },
+            { title: 'Tableaux', index: 6, keywords: ['array', 'tableau', 'push', 'map', 'filter', 'forEach'] },
+            { title: 'Objets', index: 7, keywords: ['object', 'clé', 'valeur', 'propriété'] },
+            { title: 'DOM', index: 8, keywords: ['document', 'element', 'querySelector', 'getElementById', 'html'] },
+            { title: 'Événements', index: 9, keywords: ['event', 'click', 'addEventListener', 'écouteur'] },
+            { title: 'Formulaires', index: 10, keywords: ['form', 'formulaire', 'submit', 'input', 'validation', 'focus', 'blur'] },
+            { title: 'localStorage', index: 11, keywords: ['localstorage', 'stockage', 'persistant', 'setItem', 'getItem'] },
+            { title: 'sessionStorage', index: 12, keywords: ['sessionstorage', 'session', 'temporaire', 'onglets'] },
+            { title: 'POO', index: 13, keywords: ['poo', 'objet', 'classe', 'extends', 'héritage', 'constructor', 'getter', 'setter'] }
+        ];
+        
+        searchInput?.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            if (query.length < 2) {
+                searchResults.classList.add('hidden');
+                return;
+            }
+            
+            const results = lessons.filter(l => 
+                l.title.toLowerCase().includes(query) || 
+                l.keywords.some(k => k.includes(query))
+            );
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = results.map(r => 
+                    `<button class="w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700" data-index="${r.index}">
+                        ${r.title}
+                    </button>`
+                ).join('');
+                searchResults.classList.remove('hidden');
+                
+                searchResults.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        showLesson(parseInt(btn.dataset.index));
+                        searchResults.classList.add('hidden');
+                        searchInput.value = '';
+                    });
+                });
+            } else {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                searchResults.classList.add('hidden');
+            }
+        });
+
+        // Initialize
+        updateProgress();
+        showLesson(currentLesson);
     </script>
 </body>
 </html>

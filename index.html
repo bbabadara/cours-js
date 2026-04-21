@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours JavaScript - Apprentissage Progressif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#10b981',
+                        secondary: '#6366f1'
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- Hero Section -->
+        <header class="relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20"></div>
+            <div class="absolute inset-0" style="background-image: radial-gradient(circle at 20% 50%, rgba(16, 185, 129, 0.15) 0%, transparent 50%), radial-gradient(circle at 80% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 50%);"></div>
+            
+            <nav class="relative z-10 container mx-auto px-6 py-4 flex justify-between items-center">
+                <h1 class="text-2xl font-bold"><i class="fab fa-js text-primary mr-2"></i>JS Cours</h1>
+                <a href="https://github.com" target="_blank" class="p-2 hover:bg-gray-800 rounded-lg transition">
+                    <i class="fab fa-github text-xl"></i>
+                </a>
+            </nav>
+            
+            <div class="relative z-10 container mx-auto px-6 py-20 text-center">
+                <div class="inline-block px-4 py-1 bg-primary/20 rounded-full text-primary text-sm font-medium mb-6">
+                    🚀 Cours Complet Gratuit
+                </div>
+                <h2 class="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
+                    Apprenez JavaScript<br>Pas à Pas
+                </h2>
+                <p class="text-xl text-gray-400 max-w-2xl mx-auto mb-10">
+                    Une plateforme pédagogique interactive pour maîtriser JavaScript, du niveau débutant jusqu'à un niveau intermédiaire.
+                </p>
+                <a href="cours-js.html" class="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-emerald-600 text-white font-semibold rounded-xl transition-all transform hover:scale-105 shadow-lg shadow-primary/25">
+                    <i class="fas fa-play"></i>
+                    Commencer le cours
+                </a>
+            </div>
+        </header>
+
+        <!-- Features -->
+        <section class="py-20 bg-gray-800/50">
+            <div class="container mx-auto px-6">
+                <h3 class="text-3xl font-bold text-center mb-16">Ce que vous allez apprendre</h3>
+                
+                <div class="grid md:grid-cols-3 gap-8">
+                    <div class="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-primary/50 transition">
+                        <div class="w-14 h-14 bg-primary/20 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-book text-2xl text-primary"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold mb-3">14 Leçons Progressives</h4>
+                        <p class="text-gray-400">Des fondamentaux aux concepts avancés, cada leçon ajoute de nouvelles compétences.</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-secondary/50 transition">
+                        <div class="w-14 h-14 bg-secondary/20 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-laptop-code text-2xl text-secondary"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold mb-3">Exercices Pratiques</h4>
+                        <p class="text-gray-400">Testez vos connaissances avec des exercices interactifs et des quizz.</p>
+                    </div>
+                    
+                    <div class="bg-gray-800 p-8 rounded-2xl border border-gray-700 hover:border-purple-500/50 transition">
+                        <div class="w-14 h-14 bg-purple-500/20 rounded-xl flex items-center justify-center mb-6">
+                            <i class="fas fa-save text-2xl text-purple-500"></i>
+                        </div>
+                        <h4 class="text-xl font-semibold mb-3">Progression Sauvegardée</h4>
+                        <p class="text-gray-400">Votre progression est automatiquement sauvegardée dans le navigateur.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Lessons Preview -->
+        <section class="py-20">
+            <div class="container mx-auto px-6">
+                <h3 class="text-3xl font-bold text-center mb-16">Le Programme</h3>
+                
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl mx-auto">
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">01</span>
+                        <span>Introduction</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">02</span>
+                        <span>Variables</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">03</span>
+                        <span>Types de données</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">04</span>
+                        <span>Conditions</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">05</span>
+                        <span>Boucles</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">06</span>
+                        <span>Fonctions</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">07</span>
+                        <span>Tableaux</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">08</span>
+                        <span>Objets</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">09</span>
+                        <span>DOM</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">10</span>
+                        <span>Événements</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">11</span>
+                        <span>Formulaires</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">12</span>
+                        <span>localStorage</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">13</span>
+                        <span>sessionStorage</span>
+                    </div>
+                    <div class="bg-gray-800/50 p-4 rounded-xl border border-gray-700 flex items-center gap-4">
+                        <span class="text-primary font-mono text-sm">14</span>
+                        <span>POO</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-20 bg-gradient-to-r from-primary/10 to-secondary/10">
+            <div class="container mx-auto px-6 text-center">
+                <h3 class="text-3xl font-bold mb-6">Prêt à démarrer ?</h3>
+                <p class="text-gray-400 mb-10 max-w-xl mx-auto">
+                    Rejoignez des milliers d'apprenants et maîtrisez JavaScript dès aujourd'hui.
+                </p>
+                <a href="cours-js.html" class="inline-flex items-center gap-2 px-8 py-4 bg-primary hover:bg-emerald-600 text-white font-semibold rounded-xl transition-all transform hover:scale-105">
+                    <i class="fas fa-rocket"></i>
+                    Commencer maintenant
+                </a>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="py-8 border-t border-gray-800">
+            <div class="container mx-auto px-6 text-center text-gray-500">
+                <p>© 2024 JS Cours. Créé pour l'apprentissage.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
