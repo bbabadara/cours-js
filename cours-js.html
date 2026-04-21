@@ -157,6 +157,16 @@
                 <span><span class="text-primary">14.</span> POO</span>
                 <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
             </button>
+            
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="fetch">
+                <span><span class="text-primary">15.</span> Fetch API</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
+            </button>
+            
+            <button class="lesson-btn w-full text-left px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-sm flex items-center justify-between" data-lesson="async">
+                <span><span class="text-primary">16.</span> Async/Await</span>
+                <i class="fas fa-check-circle text-primary hidden completed-icon"></i>
+            </button>
         </nav>
         
         <div class="p-4 mt-4 border-t border-gray-200 dark:border-gray-700">
@@ -1091,6 +1101,215 @@ console.log("Nouvelle surface:", rect.surface);</code></pre>
                 </div>
             </section>
 
+            <!-- Lesson 15: Fetch API -->
+            <section id="fetch" class="lesson-content">
+                <div class="mb-8">
+                    <span class="text-primary text-sm font-medium">Leçon 15/16</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">Fetch API</h2>
+                    <p class="text-gray-600 dark:text-gray-400">Fetch API permet de faire des requêtes HTTP pour récupérer ou envoyer des données.</p>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Pourquoi utiliser Fetch ?</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>Récupérer des données d'une API</li>
+                        <li>Envoyer des données au serveur</li>
+                        <li>Plus moderne que XMLHttpRequest</li>
+                        <li>Basé sur les Promises</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">fetch() - Récupérer des données</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">// Requête GET simple
+fetch('https://api.example.com/data')
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Erreur:', error));</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="// Simulation de données
+const data = { users: [{ name: 'Alice', age: 25 }, { name: 'Bob', age: 30 }] };
+console.log('Données reçues:', data);
+console.log('Utilisateur 1:', data.users[0].name);">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">fetch() - Envoyer des données</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Avec la méthode POST.</p>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">fetch('https://api.example.com/users', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        nom: 'Alice',
+        email: 'alice@email.com'
+    })
+})
+    .then(response => response.json())
+    .then(data => console.log(data));</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="// Simulation d'envoi
+const newUser = { nom: 'Alice', email: 'alice@email.com' };
+const jsonData = JSON.stringify(newUser);
+console.log('Données envoyées:', jsonData);
+console.log('parsed:', JSON.parse(jsonData));">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">Options de fetch</h3>
+                    
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">method</code> <span class="text-gray-400">GET, POST, PUT, DELETE</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">headers</code> <span class="text-gray-400">En-têtes HTTP</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">body</code> <span class="text-gray-400">Données à envoyer</span>
+                        </div>
+                        <div class="bg-gray-50 dark:bg-gray-700/30 p-3 rounded">
+                            <code class="text-yellow-500">mode</code> <span class="text-gray-400">cors, no-cors</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="fetch-q1">
+                        <p class="font-medium mb-3">Quelle méthode convertit la réponse en JSON ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="response.json()">response.json()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="response.text()">response.text()</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="JSON.parse()">JSON.parse()</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lesson 16: Async/Await -->
+            <section id="async" class="lesson-content">
+                <div class="mb-8">
+                    <span class="text-primary text-sm font-medium">Leçon 16/16</span>
+                    <h2 class="text-3xl font-bold mt-2 mb-4">Async / Await</h2>
+                    <p class="text-gray-600 dark:text-gray-400">Async/Await est une syntaxe plus élégante pour gérer les opérations asynchrones.</p>
+                </div>
+                
+                <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                    <h4 class="font-semibold text-blue-600 dark:text-blue-400 mb-2">Avantages</h4>
+                    <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                        <li>Plus lisible que les .then()</li>
+                        <li>Gestion d'erreurs simplifiée avec try/catch</li>
+                        <li>Code qui ressemble à du code synchrone</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">async function</h3>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">async function recupererDonnees() {
+    const response = await fetch('https://api.example.com/data');
+    const data = await response.json();
+    return data;
+}
+
+// Appeler la fonction
+recupererDonnees().then(data => console.log(data));</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="async function recupererDonnees() {
+    const data = { message: 'Données simulées' };
+    return data;
+}
+recupererDonnees().then(data => console.log(data.message));">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">try / catch</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Pour gérer les erreurs.</p>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">async function recupererDonnees() {
+    try {
+        const response = await fetch('https://api.example.com/data');
+        if (!response.ok) {
+            throw new Error('Erreur HTTP');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Erreur:', error);
+    }
+}</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="async function test() {
+    try {
+        const data = { user: 'Alice' };
+        if (!data) throw new Error('Pas de données');
+        return data;
+    } catch (error) {
+        return { erreur: error.message };
+    }
+}
+test().then(result => console.log('Résultat:', result));">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 mb-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4">await avec Promise.all()</h3>
+                    <p class="text-gray-600 dark:text-gray-400 mb-4">Pour exécuter plusieurs requêtes en parallèle.</p>
+                    
+                    <div class="bg-gray-50 dark:bg-gray-700/50 p-4 rounded">
+                        <pre class="bg-gray-900 p-4 rounded text-sm overflow-x-auto"><code class="language-javascript">async function chargerTout() {
+    const [users, posts] = await Promise.all([
+        fetch('/api/users').then(r => r.json()),
+        fetch('/api/posts').then(r => r.json())
+    ]);
+    
+    console.log('Users:', users);
+    console.log('Posts:', posts);
+}</code></pre>
+                        <button class="run-btn mt-2 px-3 py-1 bg-primary hover:bg-emerald-600 rounded text-sm" data-code="async function chargerTout() {
+    const users = [{ name: 'Alice' }, { name: 'Bob' }];
+    const posts = [{ title: 'Post 1' }, { title: 'Post 2' }];
+    console.log('Users:', users);
+    console.log('Posts:', posts);
+}
+chargerTout();">
+                            <i class="fas fa-play mr-1"></i>Exécuter
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Quiz -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm">
+                    <h3 class="text-xl font-semibold mb-4"><i class="fas fa-question-circle text-secondary mr-2"></i>Quiz</h3>
+                    <div class="quiz-question" data-quiz="async-q1">
+                        <p class="font-medium mb-3">Quel mot-clé permet d'attendre une Promise dans une fonction async ?</p>
+                        <div class="space-y-2">
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="await">await</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="then">then</button>
+                            <button class="quiz-option w-full text-left px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-answer="async">async</button>
+                        </div>
+                        <p class="quiz-result mt-3 text-sm font-medium hidden"></p>
+                    </div>
+                </div>
+            </section>
+
             <!-- Console Output -->
             <div class="mt-8 pt-8 border-t border-gray-200 dark:border-gray-700">
                 <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -1142,7 +1361,7 @@ console.log("Nouvelle surface:", rect.surface);</code></pre>
         overlay?.addEventListener('click', toggleSidebar);
 
         // Progress Tracking
-        const TOTAL_LESSONS = 14;
+        const TOTAL_LESSONS = 16;
         let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
         
         function updateProgress() {
@@ -1306,7 +1525,9 @@ console.log("Nouvelle surface:", rect.surface);</code></pre>
             'tab-q1': 'push()',
             'obj-q1': 'objet.nom',
             'local-q1': 'setItem()',
-            'poo-q1': 'extends'
+            'poo-q1': 'extends',
+            'fetch-q1': 'response.json()',
+            'async-q1': 'await'
         };
 
         document.querySelectorAll('.quiz-option').forEach(option => {
@@ -1354,7 +1575,9 @@ console.log("Nouvelle surface:", rect.surface);</code></pre>
             { title: 'Formulaires', index: 10, keywords: ['form', 'formulaire', 'submit', 'input', 'validation', 'focus', 'blur'] },
             { title: 'localStorage', index: 11, keywords: ['localstorage', 'stockage', 'persistant', 'setItem', 'getItem'] },
             { title: 'sessionStorage', index: 12, keywords: ['sessionstorage', 'session', 'temporaire', 'onglets'] },
-            { title: 'POO', index: 13, keywords: ['poo', 'objet', 'classe', 'extends', 'héritage', 'constructor', 'getter', 'setter'] }
+            { title: 'POO', index: 13, keywords: ['poo', 'objet', 'classe', 'extends', 'héritage', 'constructor', 'getter', 'setter'] },
+            { title: 'Fetch API', index: 14, keywords: ['fetch', 'api', 'requête', 'http', 'get', 'post', 'json'] },
+            { title: 'Async/Await', index: 15, keywords: ['async', 'await', 'asynchrone', 'promise', 'then', 'catch', 'try'] }
         ];
         
         searchInput?.addEventListener('input', (e) => {
