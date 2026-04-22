@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="fr" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cours JavaScript</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <header class="bg-gray-800 p-4 flex justify-between items-center">
+        <h1 class="text-xl font-bold text-emerald-500">← JS Cours</h1>
+        <button onclick="toggleTheme()" class="p-2 bg-gray-700 rounded">🌓</button>
+    </header>
+
+    <div class="p-4 flex">
+        <!-- Sidebar -->
+        <div class="w-48 bg-gray-800 p-2 rounded mr-4 hidden md:block" id="sidebar"></div>
+        
+        <!-- Content -->
+        <div class="flex-1" id="content"></div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="p-4 flex justify-between border-t border-gray-700">
+        <button onclick="prevLesson()" class="px-4 py-2 bg-gray-700 rounded">← Précédent</button>
+        <button onclick="nextLesson()" class="px-4 py-2 bg-emerald-600 rounded text-white">Suivant →</button>
+    </div>
+
+    <script>
+const lessons = [
+    { title: "Introduction", content: `
+        <h2 class="text-2xl font-bold mb-4">Introduction à JavaScript</h2>
+        <p class="mb-4">JavaScript est un langage de programmation interpreté, exécuté par les navigateurs.</p>
+        <div class="bg-blue-900 p-4 rounded">
+            <h3 class="font-bold mb-2">console.log()</h3>
+            <p>Affiche un message dans la console du navigateur.</p>
+            <button onclick="run('console.log(\"Hello!\")')" class="mt-2 px-3 py-1 bg-emerald-600 rounded">Tester</button>
+        </div>
+    `, exercises: [{q: "Affichez 'Bonjour'", a: 'console.log("Bonjour")'}] },
+    { title: "Variables", content: `
+        <h2 class="text-2xl font-bold mb-4">Les Variables</h2>
+        <p class="mb-4"><code class="text-yellow-500">let</code> = variable modifiable</p>
+        <p class="mb-4"><code class="text-yellow-500">const</code> = constante</p>
+        <button onclick="run('let nom=\"Alice\"; console.log(nom); const PI=3.14; console.log(PI);')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [{q: "Créez 'prenom'=\"Marie\"", a: 'const prenom="Marie"'}] },
+    { title: "Types", content: `
+        <h2 class="text-2xl font-bold mb-4">Types de données</h2>
+        <p class="mb-2">String: <code class="text-yellow-500">"texte"</code></p>
+        <p class="mb-2">Number: <code class="text-yellow-500">42, 3.14</code></p>
+        <p class="mb-2">Boolean: <code class="text-yellow-500">true, false</code></p>
+        <button onclick="run('console.log(typeof 42); console.log(typeof \"bonjour\"); console.log(typeof true);')" class="px-3 py-1 bg-emerald-600 rounded">Tester typeof</button>
+    `, exercises: [] },
+    { title: "Conditions", content: `
+        <h2 class="text-2xl font-bold mb-4">Conditions</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">if (age >= 18) {
+  console.log("majeur");
+}</pre>
+        <button onclick="run('let age=18; if(age>=18){console.log(\"Majeur\")}')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [] },
+    { title: "Boucles", content: `
+        <h2 class="text-2xl font-bold mb-4">Boucles</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">for (let i=0; i<3; i++) {
+  console.log(i);
+}</pre>
+        <button onclick="run('for(let i=0;i<3;i++){console.log(i)}')" class="px-3 py-1 bg-emerald-600 rounded">Tester for</button>
+    `, exercises: [] },
+    { title: "Fonctions", content: `
+        <h2 class="text-2xl font-bold mb-4">Fonctions</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">function salute(nom) {
+  return "Bonjour " + nom;
+}
+console.log(salute("Alice"));</pre>
+        <button onclick="run('function salute(nom){return \"Bonjour \"+nom} console.log(salute(\"Alice\"))')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [] },
+    { title: "Tableaux", content: `
+        <h2 class="text-2xl font-bold mb-4">Tableaux</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">let arr = [1,2,3];
+arr.push(4);
+console.log(arr);</pre>
+        <button onclick="run('let arr=[1,2,3]; arr.push(4); console.log(arr); console.log(arr.map(x=>x*2));')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [] },
+    { title: "Objets", content: `
+        <h2 class="text-2xl font-bold mb-4">Objets</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">let personne = {
+  nom: "Alice",
+  age: 25
+};
+console.log(personne.nom);</pre>
+        <button onclick="run('let personne={nom:\"Alice\",age:25}; console.log(personne.nom); console.log(personne.age);')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [] },
+    { title: "DOM", content: `
+        <h2 class="text-2xl font-bold mb-4">DOM</h2>
+        <p class="mb-2">document.getElementById("id")</p>
+        <p class="mb-2">element.innerHTML = "texte"</p>
+        <p class="mb-2">element.style.color = "blue"</p>
+    `, exercises: [] },
+    { title: "Événements", content: `
+        <h2 class="text-2xl font-bold mb-4">Événements</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">element.addEventListener("click", () => {
+  console.log("cliqué!");
+});</pre>
+    `, exercises: [] },
+    { title: "Formulaires", content: `
+        <h2 class="text-2xl font-bold mb-4">Formulaires</h2>
+        <p class="mb-2">submit: soumission</p>
+        <p class="mb-2">e.preventDefault()</p>
+    `, exercises: [] },
+    { title: "localStorage", content: `
+        <h2 class="text-2xl font-bold mb-4">localStorage</h2>
+        <p class="mb-2">localStorage.setItem("clé", "valeur")</p>
+        <p class="mb-2">localStorage.getItem("clé")</p>
+        <button onclick="run('localStorage.setItem(\"nom\",\"Alice\"); console.log(localStorage.getItem(\"nom\"));')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [] },
+    { title: "sessionStorage", content: `
+        <h2 class="text-2xl font-bold mb-4">sessionStorage</h2>
+        <p>Identique à localStorage mais effacé à la fermeture de l'onglet</p>
+    `, exercises: [] },
+    { title: "POO", content: `
+        <h2 class="text-2xl font-bold mb-4">Programmation Orientée Objet</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">class Personne {
+  constructor(nom) {
+    this.nom = nom;
+  }
+}
+new Personne("Alice")</pre>
+        <button onclick="run('class Pessoa{constructor(nom){this.nom=nom} ola(){return\"Olá \"+this.nom}} const p=new Pessoa(\"João\"); console.log(p.ola());')" class="px-3 py-1 bg-emerald-600 rounded">Tester</button>
+    `, exercises: [] },
+    { title: "Fetch API", content: `
+        <h2 class="text-2xl font-bold mb-4">Fetch API</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">fetch('url')
+  .then(r => r.json())
+  .then(data => console.log(data))</pre>
+    `, exercises: [] },
+    { title: "Async/Await", content: `
+        <h2 class="text-2xl font-bold mb-4">Async/Await</h2>
+        <pre class="bg-gray-800 p-3 rounded mb-4">async function load() {
+  const data = await fetch('/api');
+  return data.json();
+}</pre>
+    `, exercises: [] }
+];
+
+let current = 0;
+
+function init() {
+    renderSidebar();
+    showLesson();
+    console.log("Cours initialisé - Leçon " + (current+1) + "/" + lessons.length);
+}
+
+function renderSidebar() {
+    let html = '';
+    lessons.forEach((l, i) => {
+        html += `<button onclick="goTo(${i})" class="block w-full text-left p-2 rounded hover:bg-gray-700 ${i===current?'bg-emerald-600':''}">${i+1}. ${l.title}</button>`;
+    });
+    document.getElementById('sidebar').innerHTML = html;
+}
+
+function showLesson() {
+    document.getElementById('content').innerHTML = lessons[current].content;
+}
+
+function goTo(i) { current = i; renderSidebar(); showLesson(); }
+function nextLesson() { if(current < lessons.length-1) { current++; renderSidebar(); showLesson(); } }
+function prevLesson() { if(current > 0) { current--; renderSidebar(); showLesson(); } }
+
+function run(code) {
+    console.clear();
+    try { eval(code); } catch(e) { console.log("Erreur: " + e.message); }
+}
+
+function toggleTheme() {
+    document.documentElement.classList.toggle('dark');
+}
+
+init();
+    </script>
+</body>
+</html>
