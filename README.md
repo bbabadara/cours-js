@@ -4,7 +4,7 @@ Plateforme pédagogique pour apprendre JavaScript de manière interactive.
 
 ## Fonctionnalités
 
-- **16 leçons progressifs** - Du niveau beginner à intermédiaire
+- **16 leçons progressifs** - Du niveau débutant à intermédiaire
 - **Exercices interactifs** - Validation automatique de vos réponses
 - **Quizz** - Questions à choix multiples avec feedback
 - **Console JavaScript** - Exécutez le code directement dans le navigateur
@@ -12,6 +12,7 @@ Plateforme pédagogique pour apprendre JavaScript de manière interactive.
 - **Mode sombre/clair** - Thème adaptatif
 - **Recherche** - Trouvez rapidement un concept
 - **Responsive** - Fonctionne sur mobile et desktop
+- **Code modulaire** - Architecture maintenable et évolutive
 
 ## Leçons
 
@@ -42,7 +43,7 @@ git clone https://github.com/votre-username/js-cours.git
 
 # Ouvrir le fichier HTML
 cd js-cours
-open cours-js.html
+open index.html
 ```
 
 ## Déploiement GitHub Pages
@@ -63,18 +64,43 @@ git push -u origin main
 
 ```
 js/
-├── cours-js.html   # Cours principal
-├── index.html      # Page d'accueil pour GitHub Pages
-└── README.md       # Cette documentation
+├── index.html          # Page d'accueil pour GitHub Pages
+├── cours.html         # Page principale du cours
+├── css/
+│   └── styles.css     # Styles personnalisés
+├── js/
+│   ├── app.js        # Logique principale de l'application
+│   └── lessons.js    # Données des leçons
+└── README.md         # Cette documentation
 ```
+
+## Architecture
+
+Le code est organisé en modules JavaScript pour une meilleure maintenabilité :
+
+- **lessons.js** : Contient toutes les données des leçons (contenu, exercices, quiz, exemples)
+- **app.js** : Gère la navigation, les exercices, les quiz, la console et le state
+- **styles.css** : Styles personnalisés en complément de Tailwind CSS
+
+### Ajouter une nouvelle leçon
+
+1. Ouvrir `js/lessons.js`
+2. Ajouter un nouvel objet dans le tableau `lessons`
+3. Suivre la structure existante (id, title, content, exercises, quiz, examples)
+4. La leçon apparaît automatiquement dans la sidebar
+
+### Modifier une leçon existante
+
+1. Localiser la leçon par son `id` dans `lessons.js`
+2. Modifier le contenu, les exercices ou le quiz selon les besoins
 
 ## Technologies utilisées
 
-- HTML5
-- CSS3 (Tailwind CSS)
-- JavaScript (ES6+)
-- Font Awesome (icônes)
-- highlight.js (coloration syntaxique)
+- **HTML5** - Structure de la page
+- **CSS3 (Tailwind CSS)** - Design responsive
+- **JavaScript (ES6+)** - Logique modulaire avec modules
+- **Font Awesome** - Icônes
+- **Google Fonts (Inter)** - Typographie
 
 ## Licence
 

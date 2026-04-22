@@ -1,0 +1,324 @@
+/* =============================================================================
+   COURS JAVASCRIPT - STYLES PERSONNALISÉS
+   ============================================================================= */
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+
+/* Base */
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+.code-editor, pre, code {
+    font-family: 'Fira Code', monospace;
+}
+
+/* Lesson Content */
+.lesson-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.lesson-content.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Sidebar */
+.sidebar {
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(-100%);
+        position: fixed;
+        z-index: 50;
+    }
+    .sidebar.open {
+        transform: translateX(0);
+    }
+    main.ml-64 {
+        margin-left: 0;
+    }
+}
+
+/* Progress Bar */
+.progress-bar {
+    transition: width 0.3s ease;
+}
+
+/* Quiz */
+.quiz-option.selected {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+/* Exercises */
+.exercise-input {
+    transition: all 0.2s ease;
+}
+
+.exercise-input.correct {
+    border-color: #10b981;
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.exercise-input.incorrect {
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.1);
+}
+
+/* Code blocks */
+pre {
+    position: relative;
+}
+
+pre code {
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+/* Copy button */
+.copy-btn {
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+pre:hover .copy-btn {
+    opacity: 1;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+    background: #6b7280;
+}
+
+/* Keyboard shortcut */
+kbd {
+    display: inline-block;
+    padding: 0.2em 0.4em;
+    font-size: 0.85em;
+    font-family: 'Fira Code', monospace;
+    color: #374151;
+    background-color: #f3f4f6;
+    border: 1px solid #d1d5db;
+    border-radius: 0.25rem;
+    box-shadow: 0 1px 0 #d1d5db;
+}
+
+.dark kbd {
+    color: #e5e7eb;
+    background-color: #374151;
+    border-color: #4b5563;
+    box-shadow: 0 1px 0 #4b5563;
+}
+
+/* Highlight.js customizations */
+.hljs {
+    background: transparent !important;
+    padding: 0 !important;
+}
+
+/* Interactive elements */
+.run-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: all 0.2s ease;
+}
+
+.run-btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Tables */
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+}
+
+th {
+    font-weight: 600;
+}
+
+/* Links */
+a {
+    transition: color 0.2s ease;
+}
+
+/* Focus states */
+button:focus-visible,
+input:focus-visible {
+    outline: 2px solid #10b981;
+    outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+    background-color: #10b981;
+    color: white;
+}
+
+/* Print styles */
+@media print {
+    .sidebar,
+    .lesson-nav,
+    .progress-bar {
+        display: none !important;
+    }
+    
+    main {
+        margin-left: 0 !important;
+        padding-top: 0 !important;
+    }
+}
+
+/* Animations */
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.lesson-btn {
+    animation: slideIn 0.3s ease;
+}
+
+/* Hover effects */
+.lesson-btn:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+.dark .lesson-btn:hover {
+    background-color: rgba(16, 185, 129, 0.2);
+}
+
+/* Completed lesson indicator */
+.lesson-btn .completed-icon {
+    transition: transform 0.2s ease;
+}
+
+.lesson-btn .completed-icon:not(.hidden) {
+    animation: bounce 0.5s ease;
+}
+
+@keyframes bounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+}
+
+/* Console output */
+#consoleOutput {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+#consoleOutput::-webkit-scrollbar {
+    width: 6px;
+}
+
+#consoleOutput::-webkit-scrollbar-thumb {
+    background: #374151;
+    border-radius: 3px;
+}
+
+/* Search results */
+#searchResults {
+    z-index: 60;
+}
+
+#searchResults button {
+    transition: background-color 0.2s ease;
+}
+
+#searchResults button:hover {
+    background-color: rgba(16, 185, 129, 0.1);
+}
+
+/* Theme transition */
+body, header, aside, section {
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Mobile menu button */
+#menuBtn {
+    transition: transform 0.2s ease;
+}
+
+#menuBtn:active {
+    transform: scale(0.95);
+}
+
+/* Overlay */
+#overlay {
+    transition: opacity 0.3s ease;
+}
+
+/* Loading state */
+.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.loading::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.dark .loading::after {
+    background: rgba(17, 24, 39, 0.8);
+}
